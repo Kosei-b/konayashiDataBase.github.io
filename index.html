@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kobayashi Database Search</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root { --bg-paper:#faf7f3; --ink-dark:#3e2c23; --ink-mid:#5a4536; --accent:#8e3b3b; --card-border:#bfae9b; }
+    *{box-sizing:border-box}
+    body{margin:0;padding:0;background:var(--bg-paper);color:var(--ink-dark);font-family:"Source Sans 3",sans-serif;line-height:1.6}
+    h1,h2{font-family:"Playfair Display",serif}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    header{background:#ede7e1;padding:1.8rem 1rem;text-align:center;box-shadow:0 3px 6px rgba(0,0,0,.12);animation:fadeIn .8s ease-out both}
+    .logo{height:120px;width:auto;transition:transform .3s}
+    .logo:hover{transform:scale(1.05)}
+    .header-text h1{margin:.3rem 0 0;font-size:2.6rem;color:var(--ink-dark)}
+    .header-text .subtitle{font-size:1.1rem;color:var(--accent);margin:.2rem 0;font-weight:700}
+    .header-text .tagline{font-size:1rem;color:var(--ink-mid);margin:0}
+    main{max-width:900px;margin:auto;padding:2rem 1rem}
+    .intro{background:#f4ede7;padding:1rem 1.2rem;border-left:4px solid var(--accent);border-radius:4px;font-size:1rem}
+    h2{margin-top:2rem;font-size:1.4rem;color:var(--ink-dark)}
+    input[type=text]{width:100%;padding:.6rem .8rem;font-size:1rem;border:1px solid var(--card-border);border-radius:4px;background:#fff}
+    #hitCount{margin-top:1rem;font-weight:600;color:var(--accent)}
+    .result-card{background:#fffefc;margin:1.2rem 0;padding:1rem 1.2rem;border-left:5px solid var(--accent);border-radius:4px;box-shadow:0 2px 4px rgba(0,0,0,.08);animation:fadeIn .6s ease-out both;transition:transform .3s,box-shadow .3s}
+    .result-card:hover{transform:translateY(-3px);box-shadow:0 6px 12px rgba(0,0,0,.12)}
+    .detail-button, .report-button{margin-top:.6rem;padding:.35rem 1rem;border:none;border-radius:3px;cursor:pointer;font-size:.9rem;transition:background .25s}
+    .detail-button{background:var(--accent);color:#fff}
+    .detail-button:hover{background:#a54646}
+    .report-button{background:#5a4536;color:#fff;display:inline-block;margin-top:.8rem}
+    .report-button:hover{background:#7a604a}
+    .details{margin-top:.5rem;padding-left:.5rem;border-left:2px dashed var(--card-border)}
+    .hidden{display:none}
+  </style>
+</head>
+<body>
+  <header>
+    <img src="headerLogo.png" alt="Nikkei National Museum & Cultural Centre Logo" class="logo" />
+    <div class="header-text">
+      <h1>Kobayashi Database</h1>
+      <p class="subtitle">Historical Archive (1877 &ndash; )</p>
+      <p class="tagline">Search the stories of Japanese Canadian Issei</p>
+    </div>
+  </header>
+  <main>
+    <p class="intro">Beginning with the arrival of <strong>Manzo Nagano</strong> in 1877, thousands of Japanese men and women crossed the Pacific to build new lives on Canada&rsquo;s West Coast. These <em>Issei</em>&mdash;the first generation&mdash;forged vibrant communities despite hardship. Explore their names and stories below.</p>
+    <h2>Search by Name</h2>
+    <input type="text" id="searchInput" placeholder="Enter first or last name..." />
+    <p id="hitCount"></p>
+    <div id="results"></div>
+  </main>
+  <script>
+    // ---------- Data (excerpt + generated) ----------
+    const baseRecords=[
+      {name:"Manzo Nagano",source:"Immigration Records",birthPlace:"Tottori",arrivalYear:"1877",occupation:"Sailor",residence:"New Westminster, BC",note:"Worked in sawmills before starting a trading venture between Japan and Canada."},
+      {name:"Aiko Sato",source:"Census 1921",birthPlace:"Hiroshima",arrivalYear:"1902",occupation:"Seamstress",note:"Operated a small dress‑making service from home."},
+      {name:"Ichiro Tanaka",source:"Internment List",arrivalYear:"1920",occupation:"Fisherman",residence:"Prince Rupert, BC"},
+      {name:"Keiko Nakamura",source:"Naturalization",birthPlace:"Shizuoka",arrivalYear:"1911",occupation:"Teacher",residence:"Toronto, ON",note:"Advocated for Japanese school in Toronto."},
+      {name:"Ryo Shimizu",source:"Passenger Manifests",birthPlace:"Kumamoto",occupation:"Carpenter",residence:"Vancouver, BC",note:"Built many wooden storefronts along Powell St."},
+      /* --- Added Ryan Yada entries --- */
+      {name:"Ryan Yada",source:"Community Directories",birthPlace:"British Columbia",arrivalYear:"1975",occupation:"Entrepreneur",residence:"Vancouver, BC",note:"Co‑founded a digital heritage initiative for Nikkei history."},
+      {name:"Ryan Yada",source:"Volunteer Lists",occupation:"Archivist",note:"Volunteers at local Japanese‑Canadian museum."},
+      {name:"Ryan Yada",source:"Family Submission",birthPlace:"Alberta",arrivalYear:"1980",note:"Descendant researching Issei ancestors."}
+    ];
+    const surnames=["Sasaki","Mori","Kato","Hayashi","Inoue","Ishikawa","Nakajima","Okada","Fujita","Endo"];
+    const firstNames=["Daichi","Miyu","Kazuki","Nanami","Shota","Yuna","Kenta","Misato","Tetsuya","Rio"];
+    const prefectures=["Hokkaido","Aomori","Iwate","Saitama","Chiba","Niigata","Gifu","Yamanashi","Okinawa","Nagasaki"];
+    const cities=["Vancouver, BC","Toronto, ON","Victoria, BC","Winnipeg, MB","Calgary, AB","Steveston, BC","Kelowna, BC","Montreal, QC","New Westminster, BC","Prince Rupert, BC"];
+    const jobs=["Farmer","Clerk","Nurse","Tailor","Chef","Photographer","Carpenter","Barber","Mechanic","Teacher"];
+    const notes=["Owned sweet shop 'Kasuga'. Worked in brother's Victoria shop; opened Powell St. shop in 1913; later owned land in South Vancouver.","Volunteered as interpreter for new arrivals at immigration house.","Saved enough to purchase a fishing boat jointly with two cousins.","Helped found Japantown baseball club in 1920s."];
+    const generated=Array.from({length:95},(_,i)=>({name:`${firstNames[i%10]} ${surnames[(i+3)%10]}`,source:i%2?"Census 1921":"Immigration Records",...(i%3?{birthPlace:prefectures[i%10]}:{}),...(i%4?{arrivalYear:`${1890+(i%50)}`}:{ }),occupation:jobs[i%10],...(i%2?{residence:cities[i%10]}:{}),...(i%5===0?{note:notes[i%notes.length]}:{ })}));
+    const database=[...baseRecords,...generated];
+
+    // ---------- DOM Elements ----------
+    const searchInput=document.getElementById('searchInput');
+    const resultsDiv=document.getElementById('results');
+    const hitCountP=document.getElementById('hitCount');
+
+    // ---------- Helpers ----------
+    const fieldLine=(label,val)=>val?`<em>${label}:</em> ${val}<br>`:'';
+
+    // Render search results
+    const renderResults=list=>{
+      resultsDiv.innerHTML='';
+      list.forEach((p,idx)=>{
+        const detailsId=`details-${idx}`;
+        const cardHTML=`<div class='result-card'>
+          <strong>${p.name}</strong><br>
+          <em>Source:</em> ${p.source||'Unknown'}<br>
+          <button class='detail-button' onclick="toggleDetails('${detailsId}')">Show Details</button>
+          <div id='${detailsId}' class='details hidden'>
+            ${fieldLine('Place of Birth',p.birthPlace)}
+            ${fieldLine('Year of Arrival',p.arrivalYear)}
+            ${fieldLine('Occupation',p.occupation)}
+            ${fieldLine('Residence',p.residence)}
+            ${fieldLine('Note',p.note)}
+            <a class='report-button' href="report.html?name=${encodeURIComponent(p.name)}">Report Correction</a>
+          </div>
+        </div>`;
+        resultsDiv.insertAdjacentHTML('beforeend',cardHTML);
+      });
+    };
+
+    // Toggle details visibility
+    window.toggleDetails=id=>document.getElementById(id).classList.toggle('hidden');
+
+    // Search handler
+    searchInput.addEventListener('input',()=>{
+      const kw=searchInput.value.trim().toLowerCase();
+      if(!kw){resultsDiv.innerHTML='';hitCountP.textContent='';return;}
+      const filtered=database.filter(p=>p.name.toLowerCase().includes(kw));
+      hitCountP.textContent=`${filtered.length} result${filtered.length!==1?'s':''} found`;
+      filtered.length?renderResults(filtered):resultsDiv.textContent='No results found.';
+    });
+  </script>
+</body>
+</html>

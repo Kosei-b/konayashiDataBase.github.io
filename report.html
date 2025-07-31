@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Report a Correction | Kobayashi Database</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root{--bg:#faf7f3;--ink:#3e2c23;--accent:#8e3b3b;--border:#c8bfb4}
+    *{box-sizing:border-box}
+    body{margin:0;padding:0;background:var(--bg);font-family:"Source Sans 3",sans-serif;color:var(--ink);display:flex;justify-content:center;align-items:center;min-height:100vh}
+    .card{background:#fff;padding:2rem 2.5rem;border-left:6px solid var(--accent);box-shadow:0 4px 10px rgba(0,0,0,.12);max-width:520px;width:100%;border-radius:6px;animation:fadeIn .7s ease-out both}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    h1{font-family:"Playfair Display",serif;font-size:1.7rem;margin:0 0 1rem;color:var(--ink)}
+    label{display:block;font-weight:600;margin-top:1rem}
+    input[type=text],input[type=email],textarea{width:100%;padding:.6rem;border:1px solid var(--border);border-radius:4px;font-size:1rem;background:#fafafa}
+    textarea{height:150px;resize:vertical}
+    button{margin-top:1.4rem;padding:.6rem 1.6rem;background:var(--accent);border:none;color:#fff;font-size:1rem;border-radius:4px;cursor:pointer;transition:background .25s}
+    button:hover{background:#a54646}
+    .success-msg{margin-top:1rem;color:green;font-weight:600;display:none}
+  </style>
+</head>
+<body>
+  <form class="card" id="reportForm" onsubmit="submitReport(event)">
+    <h1>Report a Correction</h1>
+
+    <label>Person *</label>
+    <input type="text" id="personField" name="person" readonly required />
+
+    <label>Your Name</label>
+    <input type="text" name="reporter" placeholder="Optional" />
+
+    <label>Your Email</label>
+    <input type="email" name="email" placeholder="Optional" />
+
+    <label>Correction Details *</label>
+    <textarea name="details" required placeholder="Describe the correct or missing information..."></textarea>
+
+    <button type="submit">Submit Report</button>
+    <p id="successMsg" class="success-msg">Thank you! Your report has been submitted.</p>
+  </form>
+
+  <script>
+    // Prefill person field from URL ?name=
+    const params=new URLSearchParams(window.location.search);
+    document.getElementById('personField').value=params.get('name')||'';
+
+    function submitReport(e){
+      e.preventDefault();
+      // Here you would POST the data to your backend API
+      document.getElementById('successMsg').style.display='block';
+      e.target.reset();
+    }
+  </script>
+</body>
+</html>
